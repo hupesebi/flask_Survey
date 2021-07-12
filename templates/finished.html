@@ -3,11 +3,13 @@
 {% block title%} Survey finished {% endblock %}
 {% block content%} 
 <h2> Thanks for completing the survey</h2>
-<p> Your answers:</p>
+<p> Your answers and questions:</p>
 <ul>
-{% for answer in responses %}
-<li>{{answer}}</li>
-{% endfor %}
-
-</ul>
+    {% for question in questions %}
+    <li>
+      <b>{{ question.question }}:</b>
+      <i>{{ responses[loop.index0]}}</i>
+    </li>
+    {% endfor %}
+  </ul>
 {% endblock %}

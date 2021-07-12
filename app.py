@@ -1,11 +1,12 @@
-from flask import Flask, request, render_template, redirect, flash
+from flask import Flask, request, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from surveys import *
 import pdb
 
 app = Flask(__name__)
 
-responses = []
+RESP = 'responses'
+
 app.config['SECRET_KEY'] = '12345'
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 debug = DebugToolbarExtension(app)
@@ -19,16 +20,17 @@ def start():
 @app.route('/begin', methods=["POST"])
 def start_survey():
     """Clear reponses list."""
-    global responses 
-    responses = []
+    session[RESP] = []
     return redirect('/questions/0')
 
 
 @app.route('/answer', methods=["POST"])
 def get_answer():
-    global responses
+   
     answer = request.form['answer']
+    responses = session[RESP]
     responses.append(answer)
+    session[RESP] = responses
 
     if (len(responses) == len(satisfaction_survey.questions)):
         return redirect ('/finished')
@@ -37,7 +39,7 @@ def get_answer():
 
 @app.route('/questions/<int:qid>')
 def show_question(qid):
-    global responses 
+    responses = session.get(RESP)
 
     if (responses is None):
         return redirect ('/')
@@ -55,7 +57,8 @@ def show_question(qid):
 
 @app.route('/finished')
 def complete():
-    global responses
-    return render_template('finished.html', responses = responses)
+    responses =  session[RESP]
+    questions =  satisfaction_survey.questions
+    return render_template('finished.html', responses = responses, questions = questions)
 
 
